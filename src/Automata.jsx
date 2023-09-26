@@ -212,13 +212,13 @@ export default function Automata() {
   }, [activeStates]);
 
   useEffect(() => {
-    validarInput(inputValue); // Llama a validarInput cuando cambia el inputValue
-  }, [inputValue]);
+    validarInput(inputValue.toLowerCase());
+  }, [inputValue, activeStates]);
 
   function drawState(context, x, y, label, isActive) {
     context.beginPath();
     context.arc(x, y, 30, 0, 2 * Math.PI);
-    context.fillStyle = isActive ? "green" : "white"; // Cambia el color a verde si isActive es verdadero
+    context.fillStyle = isActive ? "green" : "white";
     context.fill();
     context.strokeStyle = "black";
     context.stroke();
@@ -252,19 +252,17 @@ export default function Automata() {
 
   const validarInput = (value) => {
     let allInputsValid = true;
-    let currentState = "q0"; // Estado inicial
+    let currentState = "q0";
 
     for (let i = 0; i < value.length; i++) {
       const currentCharacter = value[i];
       let transition = null;
 
       if (currentCharacter === "-") {
-        // Manejar caso especial para "-"
         transition = transitions.find(
           (t) => t.from === currentState && t.label === "-"
         );
       } else {
-        // Verificar si el carácter está en el rango adecuado
         transition = transitions.find(
           (t) =>
             t.from === currentState &&
@@ -287,15 +285,24 @@ export default function Automata() {
         break;
       }
     }
+    // Actualizar el mensaje de validación
+    if (allInputsValid) {
+      setValidationMessage("La cadena es válida.");
+    } else {
+      setValidationMessage("La cadena es inválida.");
+    }
 
     console.log(`All Inputs Valid: ${allInputsValid}`);
     setIsValid(allInputsValid);
+    if (value.length !== 9) {
+      setIsValid(false);
+    }
   };
   const handleClear = () => {
-    setInputValue(""); // Reiniciar el valor del input
-    setValidationMessage(""); // Reiniciar el mensaje de validación
-    setIsValid(false); // Establecer el estado de validez en falso
-    setActiveStates(["q0"]); // Reiniciar los estados activos
+    setInputValue("");
+    setValidationMessage("");
+    setIsValid(false);
+    setActiveStates(["q0"]);
   };
 
   return (
@@ -320,11 +327,14 @@ export default function Automata() {
           />
           <button
             onClick={handleClear}
-            class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
+            className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
           >
             Limpiar Todo
           </button>
         </div>
+        <span className={isValid ? "text-green-500" : "text-red-500"}>
+          {validationMessage}
+        </span>
       </div>
     </div>
   );
